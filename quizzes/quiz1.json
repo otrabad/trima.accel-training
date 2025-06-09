@@ -1,0 +1,20 @@
+{
+  "moduleId": "module1",
+  "title": "Evaluación del Módulo 1",
+  "description": "Comprueba tu comprensión sobre la introducción de información del donante",
+  "questions": [
+    {
+      "id": 1,
+      "text": "¿Qué información del donante es obligatoria para iniciar un procedimiento?",
+      "type": "multiple-choice",
+      "options": [
+        "Peso y altura",
+        "Edad y género",
+        "Nombre y dirección",
+        "Todas las anteriores"
+      ],
+      "correctAnswer": 3,
+      "feedback": "El sistema Trima Accel requiere el peso, altura, edad y género para calcular parámetros óptimos del procedimiento."
+    }
+  ]
+}
