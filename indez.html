@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formación Trima Accel - Sistema de Recolección de Componentes Sanguíneos</title>
+    <meta name="description" content="Plataforma de capacitación interactiva para personal técnico de hemoterapia sobre el Sistema automático de recolección de componentes sanguíneos Trima Accel">
+    
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="images/ui/favicon.png" type="image/png">
+    
+    <!-- CSS principal -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/modules.css">
+    
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Barra superior -->
+    <header class="main-header">
+        <div class="container">
+            <div class="logo-container">
+                <img src="images/ui/trima-logo.png" alt="Logo Trima Accel" class="logo">
+                <h1>Formación Trima Accel</h1>
+            </div>
+            <nav class="main-nav" id="mainNav">
+                <button id="menuToggle" class="menu-toggle" aria-label="Menú principal">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <ul class="nav-list" id="navList">
+                    <li><a href="#" class="active" data-page="home">Inicio</a></li>
+                    <li><a href="#" data-page="about">Acerca de</a></li>
+                    <li><a href="#" data-page="modules">Módulos</a></li>
+                    <li><a href="#" data-page="resources">Recursos</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Barra de progreso -->
+    <section class="progress-bar" id="progressBar">
+        <div class="container">
+            <div class="progress-info">
+                <span>Tu progreso: </span>
+                <span id="progressPercentage">0%</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contenido principal -->
+    <main class="main-content">
+        <div class="container" id="mainContainer">
+            <!-- Página de inicio -->
+            <section id="homePage" class="page active">
+                <div class="welcome-banner">
+                    <h2>Bienvenido a la plataforma de formación Trima Accel</h2>
+                    <p>Aprende a utilizar el Sistema automático de recolección de componentes sanguíneos Trima Accel® de manera interactiva y efectiva.</p>
+                </div>
+                
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <h3>Aprendizaje paso a paso</h3>
+                        <p>Módulos secuenciales que te guían a través de todo el proceso de operación del equipo.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <h3>Evaluaciones prácticas</h3>
+                        <p>Pon a prueba tus conocimientos con cuestionarios interactivos y simulaciones.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-clipboard-check"></i>
+                        </div>
+                        <h3>Seguimiento de progreso</h3>
+                        <p>Visualiza tu avance y retoma la formación donde la dejaste.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-book-medical"></i>
+                        </div>
+                        <h3>Recursos técnicos</h3>
+                        <p>Accede a material complementario para profundizar en aspectos específicos.</p>
+                    </div>
+                </div>
+                
+                <div class="cta-container">
+                    <button id="startLearningBtn" class="btn btn-primary">Comenzar formación</button>
+                    <button id="resumeLearningBtn" class="btn btn-secondary" style="display: none;">Continuar formación</button>
+                </div>
+            </section>
+
+            <!-- Página de módulos -->
+            <section id="modulesPage" class="page">
+                <h2>Módulos de formación</h2>
+                <p class="section-intro">Selecciona un módulo para comenzar o continuar tu formación. Los módulos deben completarse en orden secuencial.</p>
+                
+                <div class="modules-grid" id="modulesGrid">
+                    <!-- Módulo 1 -->
+                    <div class="module-card" data-module="module1">
+                        <div class="module-status">
+                            <span class="status-indicator"></span>
+                        </div>
+                        <div class="module-number">1</div>
+                        <div class="module-content">
+                            <h3>Introducción de la información del donante</h3>
+                            <p>Aprende a introducir correctamente los datos del donante y comprender su impacto en el procedimiento.</p>
+                            <div class="module-actions">
+                                <button class="btn btn-module" data-action="start" data-module="module1">Comenzar</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Módulo 2 -->
+                    <div class="module-card locked" data-module="module2">
+                        <div class="module-status">
+                            <span class="status-indicator"></span>
+                        </div>
+                        <div class="module-number">2</div>
+                        <div class="module-content">
+                            <h3>Pantalla de selección del procedimiento</h3>
+                            <p>Conoce los diferentes procedimientos disponibles y criterios para seleccionar el más adecuado.</p>
+                            <div class="module-actions">
+                                <button class="btn btn-module" data-action="start" data-module="module2" disabled>Comenzar</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Módulo 3 -->
+                    <div class="module-card locked" data-module="module3">
+                        <div class="module-status">
+                            <span class="status-indicator"></span>
+                        </div>
+                        <div class="module-number">3</div>
+                        <div class="module-content">
+                            <h3>Colocación de los suministros en el sistema</h3>
+                            <p>Aprende a instalar correctamente todos los componentes del equipo de líneas.</p>
+                            <div class="module-actions">
+                                <button class="btn btn-module" data-action="start" data-module="module3" disabled>Comenzar</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Módulo 4 -->
+                    <div class="module-card locked" data-module="module4">
+                        <div class="module-status">
+                            <span class="status-indicator"></span>
+                        </div>
+                        <div class="module-number">4</div>
+                        <div class="module-content">
+                            <h3>Colocación y prueba del equipo de líneas</h3>
+                            <p>Domina el proceso de instalación y verificación del equipo de líneas.</p>
+                            <div class="module-actions">
+                                <button class="btn btn-module" data-action="start" data-module="module4" disabled>Comenzar</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Módulo 5 -->
+                    <div class="module-card locked" data-module="module5">
+                        <div class="module-status">
+                            <span class="status-indicator"></span>
+                        </div>
+                        <div class="module-number">5</div>
+                        <div class="module-content">
+                            <h3>Conexión del AC y la solución de reposición</h3>
+                            <p>Aprende a conectar correctamente las soluciones necesarias para el procedimiento.</p>
+                            <div class="module-actions">
+                                <button class="btn btn-module" data-action="start" data-module="module5" disabled>Comenzar</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Módulo 6 -->
+                    <div class="module-card locked" data-module="module6">
+                        <div class="module-status">
+                            <span class="status-indicator"></span>
+                        </div>
+                        <div class="module-number">6</div>
+                        <div class="module-content">
+                            <h3>Conexión del donante y toma de muestras</h3>
+                            <p>Conoce el proceso seguro de conexión del donante y obtención de muestras.</p>
+                            <div class="module-actions">
+                                <button class="btn btn-module" data-action="start" data-module="module6" disabled>Comenzar</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Módulo 7 -->
+                    <div class="module-card locked" data-module="module7">
+                        <div class="module-status">
+                            <span class="status-indicator"></span>
+                        </div>
+                        <div class="module-number">7</div>
+                        <div class="module-content">
+                            <h3>Procedimiento de recolección</h3>
+                            <p>Comprende las fases del procedimiento y la interpretación de la información en pantalla.</p>
+                            <div class="module-actions">
+                                <button class="btn btn-module" data-action="start" data-module="module7" disabled>Comenzar</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Módulo 8 -->
+                    <div class="module-card locked" data-module="module8">
+                        <div class="module-status">
+                            <span class="status-indicator"></span>
+                        </div>
+                        <div class="module-number">8</div>
+                        <div class="module-content">
+                            <h3>Supervisión del donante y del procedimiento</h3>
+                            <p>Aprende a monitorizar al donante y el progreso del procedimiento de forma efectiva.</p>
+                            <div class="module-actions">
+                                <button class="btn btn-module" data-action="start" data-module="module8" disabled>Comenzar</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Módulo 9 -->
+                    <div class="module-card locked" data-module="module9">
+                        <div class="module-status">
+                            <span class="status-indicator"></span>
+                        </div>
+                        <div class="module-number">9</div>
+                        <div class="module-content">
+                            <h3>Realización de cambios en el procedimiento</h3>
+                            <p>Conoce cómo realizar modificaciones durante el procedimiento cuando sea necesario.</p>
+                            <div class="module-actions">
+                                <button class="btn btn-module" data-action="start" data-module="module9" disabled>Comenzar</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Módulo 10 -->
+                    <div class="module-card locked" data-module="module10">
+                        <div class="module-status">
+                            <span class="status-indicator"></span>
+                        </div>
+                        <div class="module-number">10</div>
+                        <div class="module-content">
+                            <h3>Realización de ajustes específicos</h3>
+                            <p>Domina los ajustes avanzados para optimizar el procedimiento y resolver problemas.</p>
+                            <div class="module-actions">
+                                <button class="btn btn-module" data-action="start" data-module="module10" disabled>Comenzar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Página de contenido del módulo -->
+            <section id="moduleContentPage" class="page">
+                <div class="module-navigation">
+                    <button id="backToModulesBtn" class="btn btn-back">
+                        <i class="fas fa-arrow-left"></i> Volver a módulos
+                    </button>
+                    <div class="module-breadcrumbs" id="moduleBreadcrumbs">
+                        Módulos > <span id="currentModuleTitle">Título del módulo</span>
+                    </div>
+                </div>
+                
+                <div class="module-container" id="moduleContainer">
+                    <!-- El contenido del módulo se cargará dinámicamente aquí -->
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Cargando contenido...</p>
+                    </div>
+                </div>
+                
+                <div class="module-navigation-buttons">
+                    <button id="prevSectionBtn" class="btn btn-nav" disabled>
+                        <i class="fas fa-chevron-left"></i> Anterior
+                    </button>
+                    <button id="nextSectionBtn" class="btn btn-nav">
+                        Siguiente <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Página de evaluación -->
+            <section id="quizPage" class="page">
+                <div class="quiz-header">
+                    <h2 id="quizTitle">Evaluación del Módulo</h2>
+                    <p id="quizDescription">Responde correctamente a las siguientes preguntas para completar este módulo.</p>
+                </div>
+                
+                <div class="quiz-container" id="quizContainer">
+                    <!-- Las preguntas se cargarán dinámicamente aquí -->
+                </div>
+                
+                <div class="quiz-navigation">
+                    <button id="submitQuizBtn" class="btn btn-primary">Enviar respuestas</button>
+                </div>
+            </section>
+
+            <!-- Página de resultados de evaluación -->
+            <section id="quizResultsPage" class="page">
+                <div class="results-container" id="resultsContainer">
+                    <div class="results-header">
+                        <h2>Resultados de la evaluación</h2>
+                    </div>
+                    
+                    <div class="results-score">
+                        <div class="score-circle" id="scoreCircle">
+                            <span id="scorePercentage">0%</span>
+                        </div>
+                        <p id="scoreMessage">Has respondido correctamente <span id="correctAnswers">0</span> de <span id="totalQuestions">0</span> preguntas.</p>
+                    </div>
+                    
+                    <div class="results-feedback" id="resultsFeedback">
+                        <!-- Feedback se cargará dinámicamente aquí -->
+                    </div>
+                    
+                    <div class="results-actions">
+                        <button id="retryQuizBtn" class="btn btn-secondary">Volver a intentar</button>
+                        <button id="continueBtn" class="btn btn-primary">Continuar</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Página Acerca de -->
+            <section id="aboutPage" class="page">
+                <h2>Acerca de esta plataforma</h2>
+                
+                <div class="about-content">
+                    <div class="about-section">
+                        <h3>Objetivo educativo</h3>
+                        <p>Esta plataforma ha sido diseñada para proporcionar capacitación técnica al personal de hemoterapia sobre el uso correcto y eficiente del Sistema automático de recolección de componentes sanguíneos Trima Accel®.</p>
+                        <p>A través de un enfoque estructurado y secuencial, los profesionales podrán adquirir las competencias necesarias para operar el equipo de manera segura y efectiva.</p>
+                    </div>
+                    
+                    <div class="about-section">
+                        <h3>Metodología</h3>
+                        <p>La formación se basa en un enfoque modular que combina:</p>
+                        <ul>
+                            <li>Contenido teórico con imágenes de apoyo</li>
+                            <li>Demostraciones visuales paso a paso</li>
+                            <li>Ejercicios interactivos de verificación</li>
+                            <li>Evaluaciones para confirmar la comprensión</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="about-section">
+                        <h3>Cómo utilizar esta plataforma</h3>
+                        <ol>
+                            <li>Comienza por el Módulo 1 y avanza secuencialmente</li>
+                            <li>Lee detenidamente el contenido teórico de cada módulo</li>
+                            <li>Realiza los ejercicios interactivos para reforzar el aprendizaje</li>
+                            <li>Completa la evaluación al final de cada módulo</li>
+                            <li>Debes obtener al menos un 80% en cada evaluación para desbloquear el siguiente módulo</li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Página de recursos -->
+            <section id="resourcesPage" class="page">
+                <h2>Recursos adicionales</h2>
+                
+                <div class="resources-grid">
+                    <div class="resource-card">
+                        <div class="resource-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <div class="resource-content">
+                            <h3>Manual del usuario</h3>
+                            <p>Manual completo del Sistema Trima Accel versión 7.0</p>
+                            <a href="#" class="resource-link" target="_blank">Descargar PDF</a>
+                        </div>
+                    </div>
+                    
+                    <div class="resource-card">
+                        <div class="resource-icon">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <div class="resource-content">
+                            <h3>Videos demostrativos</h3>
+                            <p>Colección de videos sobre procedimientos específicos</p>
+                            <a href="#" class="resource-link" target="_blank">Ver galería</a>
+                        </div>
+                    </div>
+                    
+                    <div class="resource-card">
+                        <div class="resource-icon">
+                            <i class="fas fa-table"></i>
+                        </div>
+                        <div class="resource-content">
+                            <h3>Tablas de referencia</h3>
+                            <p>Valores de referencia y parámetros importantes</p>
+                            <a href="#" class="resource-link" target="_blank">Consultar</a>
+                        </div>
+                    </div>
+                    
+                    <div class="resource-card">
+                        <div class="resource-icon">
+                            <i class="fas fa-question-circle"></i>
+                        </div>
+                        <div class="resource-content">
+                            <h3>Preguntas frecuentes</h3>
+                            <p>Respuestas a dudas comunes sobre el sistema</p>
+                            <a href="#" class="resource-link" target="_blank">Ver FAQ</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Pie de página -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-info">
+                <p>© 2025 Plataforma de Formación Trima Accel. Todos los derechos reservados.</p>
+                <p>Desarrollado como herramienta educativa para personal técnico de hemoterapia.</p>
+            </div>
+            <div class="footer-links">
+                <a href="#" data-page="terms">Términos de uso</a>
+                <a href="#" data-page="privacy">Política de privacidad</a>
+                <a href="#" data-page="contact">Contacto</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/app.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="js/progress.js"></script>
+    <script src="js/quiz.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</body>
+</html>
