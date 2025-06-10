@@ -2,171 +2,271 @@
  * navigation.js - Sistema de navegación para Trima Accel Training
  * 
  * Este archivo maneja:
- * - Navegación entre páginas principales (Inicio, Módulos, Recursos, etc.)
- * - Navegación dentro de los módulos (secciones, evaluaciones)
- * - Menú responsivo para dispositivos móviles
+ * - Navegación entre páginas
+ * - Carga de contenido de módulos
+ * - Navegación entre secciones de un módulo
  */
 
 document.addEventListener('DOMContentLoaded', function() {
     // Referencias a elementos DOM
-    const mainNav = document.getElementById('mainNav');
-    const navList = document.getElementById('navList');
-    const menuToggle = document.getElementById('menuToggle');
-    const mainContainer = document.getElementById('mainContainer');
+    const navLinks = document.querySelectorAll('.nav-link');
     const backToModulesBtn = document.getElementById('backToModulesBtn');
-    const startLearningBtn = document.getElementById('startLearningBtn');
-    const resumeLearningBtn = document.getElementById('resumeLearningBtn');
     const prevSectionBtn = document.getElementById('prevSectionBtn');
     const nextSectionBtn = document.getElementById('nextSectionBtn');
+    const moduleContainer = document.getElementById('moduleContainer');
     
-    // Estado de la aplicación
-    const appState = {
+    // Estado de la navegación
+    const navState = {
         currentPage: 'home',
         currentModule: null,
-        currentSection: 0,
-        moduleProgress: {},
-        lastVisitedModule: null
+        moduleLoaded: false
     };
     
-    // Inicializar navegación
+    // Inicializar sistema de navegación
     initNavigation();
     
     /**
-     * Inicializa los eventos de navegación
+     * Inicializa el sistema de navegación
      */
     function initNavigation() {
-        // Navegación principal
-        const navLinks = document.querySelectorAll('.nav-list a');
+        // Configurar enlaces de navegación
         navLinks.forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
                 const targetPage = this.getAttribute('data-page');
-                navigateToPage(targetPage);
+                navigateTo(targetPage);
             });
         });
         
-        // Menú móvil
-        if (menuToggle) {
-            menuToggle.addEventListener('click', function() {
-                navList.classList.toggle('show');
-            });
-        }
-        
-        // Botones de inicio
-        if (startLearningBtn) {
-            startLearningBtn.addEventListener('click', function() {
-                navigateToPage('modules');
-            });
-        }
-        
-        if (resumeLearningBtn) {
-            resumeLearningBtn.addEventListener('click', function() {
-                if (appState.lastVisitedModule) {
-                    loadModule(appState.lastVisitedModule);
-                } else {
-                    navigateToPage('modules');
-                }
-            });
-        }
-        
-        // Navegación de módulos
-        const moduleButtons = document.querySelectorAll('.btn-module');
-        moduleButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const moduleId = this.getAttribute('data-module');
-                const action = this.getAttribute('data-action');
-                
-                if (action === 'start') {
-                    loadModule(moduleId);
-                }
-            });
-        });
-        
-        // Botón volver a módulos
+        // Configurar botón de volver a módulos
         if (backToModulesBtn) {
             backToModulesBtn.addEventListener('click', function() {
-                navigateToPage('modules');
+                navigateTo('modules');
             });
         }
         
-        // Botones de navegación de secciones
+        // Configurar botones de navegación entre secciones
         if (prevSectionBtn) {
-            prevSectionBtn.addEventListener('click', function() {
-                navigateToSection(appState.currentSection - 1);
-            });
+            prevSectionBtn.addEventListener('click', navigateToPreviousSection);
         }
         
         if (nextSectionBtn) {
-            nextSectionBtn.addEventListener('click', function() {
-                navigateToSection(appState.currentSection + 1);
-            });
+            nextSectionBtn.addEventListener('click', navigateToNextSection);
         }
         
-        // Cargar estado guardado
-        loadSavedState();
+        // Determinar página inicial basada en la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const pageParam = urlParams.get('page');
+        const moduleParam = urlParams.get('module');
+        
+        if (pageParam) {
+            navigateTo(pageParam, moduleParam);
+        } else {
+            // Mostrar página de inicio por defecto
+            navigateTo('home');
+        }
+        
+        // Exponer función de navegación globalmente
+        window.navigateTo = navigateTo;
     }
     
     /**
-     * Navega a la página especificada
-     * @param {string} pageId - ID de la página destino
+     * Navega a una página específica
+     * @param {string} page - Página a mostrar
+     * @param {string} [moduleId] - ID del módulo (opcional)
      */
-    function navigateToPage(pageId) {
+    function navigateTo(page, moduleId) {
         // Ocultar todas las páginas
-        const pages = document.querySelectorAll('.page');
-        pages.forEach(page => {
-            page.classList.remove('active');
+        document.querySelectorAll('.page').forEach(p => {
+            p.style.display = 'none';
         });
         
-        // Mostrar la página seleccionada
-        const targetPage = document.getElementById(pageId + 'Page');
-        if (targetPage) {
-            targetPage.classList.add('active');
-        }
-        
-        // Actualizar navegación
-        const navLinks = document.querySelectorAll('.nav-list a');
+        // Actualizar enlaces de navegación
         navLinks.forEach(link => {
-            link.classList.remove('active');
-            if (link.getAttribute('data-page') === pageId) {
+            if (link.getAttribute('data-page') === page) {
                 link.classList.add('active');
+            } else {
+                link.classList.remove('active');
             }
         });
         
-        // Cerrar menú móvil si está abierto
-        navList.classList.remove('show');
+        // Mostrar página solicitada
+        const targetPage = document.getElementById(`${page}Page`);
+        if (targetPage) {
+            targetPage.style.display = 'block';
+        }
         
-        // Actualizar estado
-        appState.currentPage = pageId;
-        saveState();
+        // Actualizar estado de navegación
+        navState.currentPage = page;
         
-        // Scroll al inicio
-        window.scrollTo(0, 0);
+        // Acciones específicas según la página
+        switch (page) {
+            case 'modules':
+                loadModules();
+                break;
+            case 'moduleContent':
+                if (moduleId) {
+                    loadModuleContent(moduleId);
+                    navState.currentModule = moduleId;
+                } else if (navState.currentModule) {
+                    loadModuleContent(navState.currentModule);
+                } else {
+                    // Si no hay módulo especificado, volver a la lista de módulos
+                    navigateTo('modules');
+                }
+                break;
+        }
+        
+        // Actualizar URL para reflejar la navegación
+        updateURL(page, moduleId);
     }
     
     /**
-     * Carga un módulo específico
-     * @param {string} moduleId - ID del módulo a cargar
+     * Actualiza la URL para reflejar la navegación actual
+     * @param {string} page - Página actual
+     * @param {string} [moduleId] - ID del módulo (opcional)
      */
-    function loadModule(moduleId) {
-        // Actualizar estado
-        appState.currentModule = moduleId;
-        appState.currentSection = 0;
-        appState.lastVisitedModule = moduleId;
-        
-        // Actualizar título del módulo
-        const moduleCard = document.querySelector(`.module-card[data-module="${moduleId}"]`);
-        if (moduleCard) {
-            const moduleTitle = moduleCard.querySelector('h3').textContent;
-            document.getElementById('currentModuleTitle').textContent = moduleTitle;
+    function updateURL(page, moduleId) {
+        let url = `?page=${page}`;
+        if (moduleId) {
+            url += `&module=${moduleId}`;
         }
         
-        // Navegar a la página de contenido del módulo
-        navigateToPage('moduleContent');
+        window.history.pushState({
+            page: page,
+            module: moduleId
+        }, '', url);
+    }
+    
+    /**
+     * Carga la lista de módulos disponibles
+     */
+    function loadModules() {
+        const modulesContainer = document.getElementById('modulesContainer');
+        if (!modulesContainer) return;
         
-        // Cargar contenido del módulo
-        loadModuleContent(moduleId);
+        // Mostrar spinner de carga
+        modulesContainer.innerHTML = `
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Cargando módulos...</p>
+            </div>
+        `;
         
-        saveState();
+        // Simular carga de datos (en una implementación real, esto cargaría desde una API o JSON)
+        setTimeout(() => {
+            // Datos de ejemplo para los módulos
+            const modules = [
+                {
+                    id: 'module1',
+                    title: 'Introducción de la información del donante',
+                    description: 'Aprende a introducir correctamente los datos del donante en el sistema Trima Accel.',
+                    duration: '15 minutos',
+                    progress: 0,
+                    status: 'not-started' // not-started, in-progress, completed
+                },
+                {
+                    id: 'module2',
+                    title: 'Configuración del procedimiento',
+                    description: 'Aprende a configurar correctamente los parámetros del procedimiento en el sistema Trima Accel.',
+                    duration: '20 minutos',
+                    progress: 0,
+                    status: 'not-started'
+                },
+                {
+                    id: 'module3',
+                    title: 'Manejo de alarmas y alertas',
+                    description: 'Aprende a identificar y responder a las diferentes alarmas y alertas del sistema Trima Accel.',
+                    duration: '25 minutos',
+                    progress: 0,
+                    status: 'not-started'
+                }
+            ];
+            
+            // Obtener progreso guardado
+            const savedProgress = JSON.parse(localStorage.getItem('trimaAccelProgress') || '{}');
+            
+            // Actualizar progreso de los módulos
+            modules.forEach(module => {
+                if (savedProgress[module.id]) {
+                    module.progress = savedProgress[module.id].progress;
+                    module.status = savedProgress[module.id].status;
+                }
+            });
+            
+            // Renderizar módulos
+            modulesContainer.innerHTML = '';
+            
+            modules.forEach(module => {
+                const moduleCard = createModuleCard(module);
+                modulesContainer.appendChild(moduleCard);
+            });
+        }, 1000);
+    }
+    
+    /**
+     * Crea una tarjeta para un módulo
+     * @param {Object} module - Datos del módulo
+     * @returns {HTMLElement} Elemento de la tarjeta
+     */
+    function createModuleCard(module) {
+        const card = document.createElement('div');
+        card.className = `module-card ${module.status}`;
+        
+        // Determinar texto del botón según el estado
+        let buttonText = 'Comenzar';
+        if (module.status === 'in-progress') {
+            buttonText = 'Continuar';
+        } else if (module.status === 'completed') {
+            buttonText = 'Repasar';
+        }
+        
+        card.innerHTML = `
+            <div class="module-info">
+                <h3 class="module-title">${module.title}</h3>
+                <p class="module-description">${module.description}</p>
+                <div class="module-meta">
+                    <span class="module-duration"><i class="far fa-clock"></i> ${module.duration}</span>
+                    <span class="module-status">${getStatusText(module.status)}</span>
+                </div>
+            </div>
+            <div class="module-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${module.progress}%"></div>
+                </div>
+                <span class="progress-text">${module.progress}% completado</span>
+            </div>
+            <div class="module-actions">
+                <button class="btn btn-primary start-module" data-module-id="${module.id}">${buttonText}</button>
+            </div>
+        `;
+        
+        // Configurar evento para el botón de inicio
+        const startButton = card.querySelector('.start-module');
+        startButton.addEventListener('click', function() {
+            const moduleId = this.getAttribute('data-module-id');
+            navigateTo('moduleContent', moduleId);
+        });
+        
+        return card;
+    }
+    
+    /**
+     * Obtiene el texto de estado para un módulo
+     * @param {string} status - Estado del módulo
+     * @returns {string} Texto del estado
+     */
+    function getStatusText(status) {
+        switch (status) {
+            case 'not-started':
+                return 'No iniciado';
+            case 'in-progress':
+                return 'En progreso';
+            case 'completed':
+                return 'Completado';
+            default:
+                return '';
+        }
     }
     
     /**
@@ -175,6 +275,25 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     function loadModuleContent(moduleId) {
         const moduleContainer = document.getElementById('moduleContainer');
+        if (!moduleContainer) return;
+        
+        // Actualizar título del módulo en la navegación
+        const currentModuleTitle = document.getElementById('currentModuleTitle');
+        if (currentModuleTitle) {
+            switch (moduleId) {
+                case 'module1':
+                    currentModuleTitle.textContent = 'Introducción de la información del donante';
+                    break;
+                case 'module2':
+                    currentModuleTitle.textContent = 'Configuración del procedimiento';
+                    break;
+                case 'module3':
+                    currentModuleTitle.textContent = 'Manejo de alarmas y alertas';
+                    break;
+                default:
+                    currentModuleTitle.textContent = 'Contenido del módulo';
+            }
+        }
         
         // Mostrar spinner de carga
         moduleContainer.innerHTML = `
@@ -184,257 +303,198 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
         
-        // Simular carga de contenido (en una aplicación real, aquí cargarías el contenido desde un archivo)
-        setTimeout(() => {
-            // Esta es una simulación. En una implementación real, cargarías el contenido desde un archivo Markdown
-            moduleContainer.innerHTML = `
-                <div class="module-section">
-                    <h2>Introducción</h2>
-                    <p>Este es el contenido de ejemplo para el módulo ${moduleId}.</p>
-                    <p>En una implementación completa, este contenido se cargaría desde un archivo Markdown externo y se convertiría a HTML.</p>
-                </div>
-                <div class="module-section">
-                    <h2>Contenido principal</h2>
-                    <p>Aquí iría el contenido principal del módulo, con explicaciones detalladas, imágenes y ejemplos interactivos.</p>
-                </div>
-                <div class="module-section">
-                    <h2>Evaluación</h2>
-                    <p>Al final de cada módulo, se presenta una evaluación para comprobar el aprendizaje.</p>
-                    <button id="startQuizBtn" class="btn btn-primary">Iniciar evaluación</button>
-                </div>
-            `;
-            
-            // Añadir evento al botón de evaluación
-            const startQuizBtn = document.getElementById('startQuizBtn');
-            if (startQuizBtn) {
-                startQuizBtn.addEventListener('click', function() {
-                    loadQuiz(moduleId);
+        // Cargar contenido desde archivo Markdown
+        fetch(`modules/${moduleId}.md`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('No se pudo cargar el contenido del módulo');
+                }
+                return response.text();
+            })
+            .then(markdown => {
+                // Convertir Markdown a HTML
+                const html = marked.parse(markdown);
+                
+                // Insertar HTML en el contenedor
+                moduleContainer.innerHTML = html;
+                
+                // Añadir clases a los encabezados h2 para la navegación por secciones
+                moduleContainer.querySelectorAll('h2').forEach(h2 => {
+                    h2.classList.add('section-title');
                 });
-            }
-            
-            updateSectionNavigation();
-        }, 1000);
+                
+                // Configurar botón de evaluación
+                setupQuizButton(moduleId);
+                
+                // Inicializar navegación entre secciones
+                initSectionNavigation();
+                
+                // Actualizar estado del módulo a "en progreso"
+                updateModuleProgress(moduleId, 'in-progress', 25);
+                
+                // Marcar módulo como cargado
+                navState.moduleLoaded = true;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                moduleContainer.innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Error al cargar el contenido. Por favor, inténtalo de nuevo más tarde.</p>
+                    </div>
+                `;
+            });
     }
     
     /**
-     * Navega a una sección específica dentro del módulo actual
-     * @param {number} sectionIndex - Índice de la sección
-     */
-    function navigateToSection(sectionIndex) {
-        const sections = document.querySelectorAll('.module-section');
-        
-        if (sectionIndex >= 0 && sectionIndex < sections.length) {
-            appState.currentSection = sectionIndex;
-            
-            // Scroll a la sección
-            sections[sectionIndex].scrollIntoView({ behavior: 'smooth' });
-            
-            updateSectionNavigation();
-            saveState();
-        }
-    }
-    
-    /**
-     * Actualiza los botones de navegación de secciones
-     */
-    function updateSectionNavigation() {
-        const sections = document.querySelectorAll('.module-section');
-        
-        if (sections.length > 0) {
-            // Habilitar/deshabilitar botón anterior
-            prevSectionBtn.disabled = (appState.currentSection === 0);
-            
-            // Habilitar/deshabilitar botón siguiente
-            nextSectionBtn.disabled = (appState.currentSection === sections.length - 1);
-        }
-    }
-    
-    /**
-     * Carga una evaluación para el módulo especificado
+     * Configura el botón de inicio de evaluación
      * @param {string} moduleId - ID del módulo
      */
-    function loadQuiz(moduleId) {
-        // Navegar a la página de evaluación
-        navigateToPage('quiz');
+    function setupQuizButton(moduleId) {
+        // Buscar todos los botones con texto "Iniciar evaluación"
+        const quizButtons = Array.from(document.querySelectorAll('button')).filter(
+            button => button.textContent.includes('Iniciar evaluación')
+        );
         
-        // Actualizar título de la evaluación
-        document.getElementById('quizTitle').textContent = `Evaluación del Módulo ${moduleId.replace('module', '')}`;
-        
-        // Simular carga de preguntas (en una aplicación real, cargarías desde un archivo JSON)
-        const quizContainer = document.getElementById('quizContainer');
-        quizContainer.innerHTML = `
-            <div class="quiz-question">
-                <p class="question-text">1. ¿Cuál es la función principal del sistema Trima Accel?</p>
-                <ul class="question-options">
-                    <li class="question-option">
-                        <input type="radio" name="q1" id="q1_a" value="a">
-                        <label for="q1_a">Análisis de muestras sanguíneas</label>
-                    </li>
-                    <li class="question-option">
-                        <input type="radio" name="q1" id="q1_b" value="b">
-                        <label for="q1_b">Recolección de componentes sanguíneos</label>
-                    </li>
-                    <li class="question-option">
-                        <input type="radio" name="q1" id="q1_c" value="c">
-                        <label for="q1_c">Almacenamiento de sangre</label>
-                    </li>
-                </ul>
-            </div>
-            <div class="quiz-question">
-                <p class="question-text">2. ¿Qué información del donante es esencial antes de iniciar un procedimiento?</p>
-                <ul class="question-options">
-                    <li class="question-option">
-                        <input type="radio" name="q2" id="q2_a" value="a">
-                        <label for="q2_a">Solo el nombre</label>
-                    </li>
-                    <li class="question-option">
-                        <input type="radio" name="q2" id="q2_b" value="b">
-                        <label for="q2_b">Peso y altura</label>
-                    </li>
-                    <li class="question-option">
-                        <input type="radio" name="q2" id="q2_c" value="c">
-                        <label for="q2_c">Peso, altura, género y hematocrito</label>
-                    </li>
-                </ul>
-            </div>
-        `;
-        
-        // Configurar botón de envío
-        const submitQuizBtn = document.getElementById('submitQuizBtn');
-        if (submitQuizBtn) {
-            submitQuizBtn.addEventListener('click', function() {
-                showQuizResults();
-            });
-        }
-    }
-    
-    /**
-     * Muestra los resultados de la evaluación
-     */
-    function showQuizResults() {
-        // Navegar a la página de resultados
-        navigateToPage('quizResults');
-        
-        // Simular resultados
-        document.getElementById('scorePercentage').textContent = '75%';
-        document.getElementById('correctAnswers').textContent = '3';
-        document.getElementById('totalQuestions').textContent = '4';
-        
-        // Configurar círculo de puntuación
-        const scoreCircle = document.getElementById('scoreCircle');
-        scoreCircle.style.setProperty('--score-height', '75%');
-        
-        // Mostrar retroalimentación
-        const resultsFeedback = document.getElementById('resultsFeedback');
-        resultsFeedback.innerHTML = `
-            <div class="feedback-item correct">
-                <p class="question">1. ¿Cuál es la función principal del sistema Trima Accel?</p>
-                <p class="answer">Tu respuesta: Recolección de componentes sanguíneos</p>
-                <p class="correct-answer">¡Correcto!</p>
-            </div>
-            <div class="feedback-item incorrect">
-                <p class="question">2. ¿Qué información del donante es esencial antes de iniciar un procedimiento?</p>
-                <p class="answer">Tu respuesta: Peso y altura</p>
-                <p class="correct-answer">Respuesta correcta: Peso, altura, género y hematocrito</p>
-            </div>
-        `;
-        
-        // Configurar botones
-        const retryQuizBtn = document.getElementById('retryQuizBtn');
-        const continueBtn = document.getElementById('continueBtn');
-        
-        if (retryQuizBtn) {
-            retryQuizBtn.addEventListener('click', function() {
-                loadQuiz(appState.currentModule);
-            });
-        }
-        
-        if (continueBtn) {
-            continueBtn.addEventListener('click', function() {
-                // Marcar módulo como completado si la puntuación es suficiente
-                if (!appState.moduleProgress[appState.currentModule]) {
-                    appState.moduleProgress[appState.currentModule] = {
-                        status: 'completed',
-                        score: 75
-                    };
-                    
-                    // Actualizar UI del módulo
-                    updateModuleStatus();
-                    
-                    // Guardar estado
-                    saveState();
-                }
+        quizButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Disparar evento para cargar la evaluación
+                const event = new CustomEvent('loadQuiz', {
+                    detail: { moduleId: moduleId }
+                });
+                document.dispatchEvent(event);
                 
-                // Volver a la lista de módulos
-                navigateToPage('modules');
+                // Navegar a la página de evaluación
+                navigateTo('quiz', moduleId);
             });
-        }
-    }
-    
-    /**
-     * Actualiza el estado visual de los módulos en la interfaz
-     */
-    function updateModuleStatus() {
-        const moduleCards = document.querySelectorAll('.module-card');
-        
-        moduleCards.forEach((card, index) => {
-            const moduleId = card.getAttribute('data-module');
-            const progress = appState.moduleProgress[moduleId];
-            
-            if (progress) {
-                card.setAttribute('data-status', progress.status);
-                
-                // Desbloquear el siguiente módulo si este está completado
-                if (progress.status === 'completed' && index < moduleCards.length - 1) {
-                    const nextCard = moduleCards[index + 1];
-                    nextCard.classList.remove('locked');
-                    const nextButton = nextCard.querySelector('.btn-module');
-                    if (nextButton) {
-                        nextButton.disabled = false;
-                    }
-                }
-            }
         });
     }
     
+    // Variables para la navegación entre secciones
+    let currentSectionIndex = 0;
+    let moduleSections = [];
+    
     /**
-     * Guarda el estado actual de la aplicación en localStorage
+     * Inicializa la navegación entre secciones
      */
-    function saveState() {
-        const state = {
-            currentPage: appState.currentPage,
-            currentModule: appState.currentModule,
-            currentSection: appState.currentSection,
-            moduleProgress: appState.moduleProgress,
-            lastVisitedModule: appState.lastVisitedModule
-        };
+    function initSectionNavigation() {
+        // Obtener todas las secciones del módulo (elementos con encabezados h2)
+        moduleSections = Array.from(document.querySelectorAll('.module-content h2.section-title')).map(
+            heading => heading.parentElement || heading
+        );
         
-        localStorage.setItem('trimaAccelTrainingState', JSON.stringify(state));
+        // Si no hay secciones, deshabilitar botones
+        if (moduleSections.length <= 1) {
+            if (prevSectionBtn) prevSectionBtn.disabled = true;
+            if (nextSectionBtn) nextSectionBtn.disabled = true;
+            return;
+        }
+        
+        // Inicializar en la primera sección
+        currentSectionIndex = 0;
+        updateNavigationButtonsState();
     }
     
     /**
-     * Carga el estado guardado desde localStorage
+     * Navega a la sección anterior
      */
-    function loadSavedState() {
-        const savedState = localStorage.getItem('trimaAccelTrainingState');
-        
-        if (savedState) {
-            const state = JSON.parse(savedState);
+    function navigateToPreviousSection() {
+        if (currentSectionIndex > 0) {
+            currentSectionIndex--;
+            scrollToCurrentSection();
+            updateNavigationButtonsState();
+        }
+    }
+    
+    /**
+     * Navega a la siguiente sección
+     */
+    function navigateToNextSection() {
+        if (currentSectionIndex < moduleSections.length - 1) {
+            currentSectionIndex++;
+            scrollToCurrentSection();
+            updateNavigationButtonsState();
             
-            // Restaurar estado
-            appState.currentModule = state.currentModule;
-            appState.currentSection = state.currentSection;
-            appState.moduleProgress = state.moduleProgress || {};
-            appState.lastVisitedModule = state.lastVisitedModule;
-            
-            // Actualizar UI
-            updateModuleStatus();
-            
-            // Mostrar botón de continuar si hay un módulo visitado anteriormente
-            if (appState.lastVisitedModule && startLearningBtn && resumeLearningBtn) {
-                startLearningBtn.style.display = 'none';
-                resumeLearningBtn.style.display = 'inline-block';
+            // Si es la última sección, actualizar progreso
+            if (currentSectionIndex === moduleSections.length - 1 && navState.currentModule) {
+                updateModuleProgress(navState.currentModule, 'in-progress', 75);
             }
         }
     }
+    
+    /**
+     * Desplaza la vista a la sección actual
+     */
+    function scrollToCurrentSection() {
+        const currentSection = moduleSections[currentSectionIndex];
+        if (currentSection) {
+            // Usar un pequeño offset para evitar que el encabezado quede bajo la barra de navegación
+            const offset = 20;
+            const sectionTop = currentSection.getBoundingClientRect().top + window.pageYOffset - offset;
+            
+            window.scrollTo({
+                top: sectionTop,
+                behavior: 'smooth'
+            });
+        }
+    }
+    
+    /**
+     * Actualiza el estado de los botones de navegación
+     */
+    function updateNavigationButtonsState() {
+        if (prevSectionBtn) {
+            prevSectionBtn.disabled = currentSectionIndex === 0;
+        }
+        
+        if (nextSectionBtn) {
+            nextSectionBtn.disabled = currentSectionIndex === moduleSections.length - 1;
+        }
+    }
+    
+    /**
+     * Actualiza el progreso de un módulo
+     * @param {string} moduleId - ID del módulo
+     * @param {string} status - Estado del módulo
+     * @param {number} progress - Porcentaje de progreso
+     */
+    function updateModuleProgress(moduleId, status, progress) {
+        // Obtener progreso guardado
+        const savedProgress = JSON.parse(localStorage.getItem('trimaAccelProgress') || '{}');
+        
+        // Actualizar progreso
+        savedProgress[moduleId] = {
+            status: status,
+            progress: progress,
+            lastUpdated: new Date().toISOString()
+        };
+        
+        // Guardar progreso actualizado
+        localStorage.setItem('trimaAccelProgress', JSON.stringify(savedProgress));
+        
+        // Disparar evento de progreso actualizado
+        const event = new CustomEvent('progressUpdated', {
+            detail: {
+                moduleId: moduleId,
+                status: status,
+                progress: progress
+            }
+        });
+        document.dispatchEvent(event);
+    }
+    
+    // Manejar eventos de navegación del navegador
+    window.addEventListener('popstate', function(event) {
+        if (event.state) {
+            navigateTo(event.state.page, event.state.module);
+        } else {
+            navigateTo('home');
+        }
+    });
+    
+    // Escuchar evento de módulo completado
+    document.addEventListener('moduleCompleted', function(e) {
+        const moduleId = e.detail.moduleId;
+        updateModuleProgress(moduleId, 'completed', 100);
+    });
 });
